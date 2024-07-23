@@ -2,7 +2,6 @@ import java.util.*;
 class Main {
     public static int n;
     public static int m;
-    public static int[] visited=new int[30];
     public static int[] dx={-1,0,1,0};
     public static int[] dy={0,1,0,-1};
     public static char[][] alpa;
@@ -20,20 +19,19 @@ class Main {
                 alpa[i][j]=s.charAt(j);
             }
         }
-        dfs(0,0);
+        dfs(0,0,1<<(int)(alpa[0][0]-'A'),1);
         System.out.println(maxn);
     }
-    public static void dfs(int y,int x){
-        total++;
-        visited[alpa[y][x]-'A']=1;
+    public static void dfs(int y,int x,int visited,int sum){
+        maxn=Math.max(maxn,sum);
         for(int i=0;i<4;i++){
             int nx=x+dx[i];
             int ny=y+dy[i];
-            if(nx<0||ny<0||nx>=m||ny>=n||visited[alpa[ny][nx]-'A']==1) continue;
-            dfs(ny,nx);
+            if(nx<0||ny<0||nx>=m||ny>=n) continue;
+            int n=(int)(alpa[ny][nx]-'A');
+            if((visited&(1<<n))==0){
+                dfs(ny,nx,visited|(1<<n),sum+1);
+            }
         }
-        maxn=Math.max(maxn,total);
-        total--;
-        visited[alpa[y][x]-'A']=0;
     }
 }
