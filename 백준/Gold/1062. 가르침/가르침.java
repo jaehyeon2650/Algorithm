@@ -3,52 +3,44 @@ class Main {
 
     public static int n;
     public static int k;
-    public static int[][] words;
+    public static int[] words;
     public static int maxn=0;
 
     public static void main(String[] args) {
-        Scanner scan=new Scanner(System.in);
-        n=scan.nextInt();
-        k=scan.nextInt();
-        words=new int[n][27];
-        for(int i=0;i<n;i++){
-            String s=scan.next();
-            for(int j=0;j<s.length();j++){
-                if(words[i][s.charAt(j)-'a']==0){
-                    words[i][s.charAt(j)-'a']=1;
-                }
+        Scanner scan = new Scanner(System.in);
+        n = scan.nextInt();
+        k = scan.nextInt();
+        scan.nextLine();
+        words = new int[n];
+        for (int i = 0; i < n; i++) {
+            String s = scan.nextLine();
+            for(char c:s.toCharArray()){
+                words[i]|=(1<<(c-'a'));
             }
         }
-        int[] b=new int[26];
-        solution(b,0,0);
+        solution(0,0,0);
         System.out.println(maxn);
     }
-    public static void print(int[] b){
+    public static void print(int mask){
         int count=0;
-        for(int[] word:words){
-            boolean can=true;
-            for(int i=0;i<word.length;i++){
-                if(word[i]==1&&b[i]!=1){
-                    can=false;
-                    break;
-                }
+        for(int word:words){
+            if((word&mask)==word){
+                count++;
             }
-            if(can) count++;
         }
         maxn=Math.max(count,maxn);
     }
-    public static void solution(int[] b,int count,int index){
+    public static void solution(int mask,int count,int index){
         if(count==k){
-            print(b);
+            print(mask);
+            return;
         }
         if(index==26){
             return;
         }
-        b[index]=1;
-        solution(b,count+1,index+1);
-        b[index]=0;
-        if(index!='a'-'a'&&index!='n'-'a'&&index!='t'-'a'&&index!='i'-'a'&&index!='c'-'a'){
-            solution(b,count,index+1);
+        solution(mask|(1<<index),count+1,index+1);
+        if(index!='a'-'a'&&index!='n'-'a'&&index!='c'-'a'&&index!='i'-'a'&&index!='t'-'a'){
+            solution(mask,count,index+1);
         }
     }
 }
