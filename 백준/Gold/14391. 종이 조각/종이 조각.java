@@ -22,59 +22,39 @@ class Main {
                 nums[i][j]= Character.getNumericValue(s.charAt(j));
             }
         }
-        Vector<Integer> v=new Vector<>();
-        makeBit(v);
+        solution();
+    }
+    public static void solution(){
+        for(int s=0;s<(1<<(n*m));s++){
+            int sum=0;
+            for(int i=0;i<n;i++){
+                int cur=0;
+                for(int j=0;j<m;j++){
+                    int k=m*i+j;
+                    if((s&(1<<k))==0){
+                        cur=cur*10+nums[i][j];
+                    }else{
+                        sum+=cur;
+                        cur=0;
+                    }
+                }
+                sum+=cur;
+            }
+            for(int i=0;i<m;i++){
+                int cur=0;
+                for(int j=0;j<n;j++){
+                    int k=m*j+i;
+                    if((s&(1<<k))>0){
+                        cur=cur*10+nums[j][i];
+                    }else{
+                        sum+=cur;
+                        cur=0;
+                    }
+                }
+                sum+=cur;
+            }
+            maxn=Math.max(maxn,sum);
+        }
         System.out.println(maxn);
     }
-    public static void makeBit(Vector<Integer> v){
-        if(v.size()==n){
-            makeVisitedZero();
-            maxn=Math.max(maxn,start(v));
-            return;
-        }
-        for(int i=0;i<(1<<m);i++){
-            v.add(i);
-            makeBit(v);
-            v.remove(v.size()-1);
-        }
-    }
-    public static void makeVisitedZero(){
-        for(int i=0;i<n;i++){
-            Arrays.fill(visited[i],0);
-        }
-    }
-
-    public static int start(Vector<Integer> v){
-        int total=0;
-        for(int i=0;i<n;i++){
-            int num=v.get(i);
-            int same=1;
-            int sum=0;
-            for(int j=m-1;j>=0;j--){
-                if((num&(1<<(m-1-j)))>0){
-                    visited[i][j]=1;
-                    sum+=(nums[i][j]*same);
-                    same*=10;
-                }else{
-                    same=1;
-                }
-            }
-            total+=sum;
-        }
-        for(int i=0;i<m;i++){
-            int sum=0;
-            int same=1;
-            for(int j=n-1;j>=0;j--){
-                if(visited[j][i]==0){
-                    sum+=(nums[j][i]*same);
-                    same*=10;
-                }else{
-                    same=1;
-                }
-            }
-            total+=sum;
-        }
-        return total;
-    }
-
 }
