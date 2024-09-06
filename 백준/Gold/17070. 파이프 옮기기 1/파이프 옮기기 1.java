@@ -4,67 +4,51 @@
     class Main {
 
         public static int n;
-        public static int num=0;
-        public static int[][] visited;
+        public static int dp[][][];
         public static int[][] a;
-        public static int[] dx={1,1,0};
-        public static int[] dy={0,1,1};
 
         public static void main(String[] args) throws IOException {
             BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
             n=Integer.parseInt(bf.readLine());
-            visited=new int[n][n];
-            a=new int[n][n];
-            for(int i=0;i<n;i++){
+            a=new int[24][24];
+            dp=new int[24][24][3];
+            dp[1][2][0]=1;
+            for(int i=1;i<=n;i++){
                 String s=bf.readLine();
                 String[] strings = s.split(" ");
                 for(int j=0;j<n;j++){
-                    a[i][j]=Integer.parseInt(strings[j]);
+                    a[i][j+1]=Integer.parseInt(strings[j]);
                 }
             }
-            visited[0][0]=visited[0][1]=1;
-            dfs(0,1);
-            System.out.println(num);
+            for(int i=1;i<=n;i++){
+                for(int j=1;j<=n;j++){
+                    // 원래 가로
+                    if(check(i,j+1,0)) dp[i][j+1][0]+=dp[i][j][0];
+                    if(check(i+1,j+1,1)) dp[i+1][j+1][1]+=dp[i][j][0];
+
+                    // 원래 세로
+                    if(check(i+1,j,2)) dp[i+1][j][2]+=dp[i][j][2];
+                    if(check(i+1,j+1,1)) dp[i+1][j+1][1]+=dp[i][j][2];
+
+                    // 원래 대각
+                    if(check(i+1,j,2)) dp[i+1][j][2]+=dp[i][j][1];
+                    if(check(i+1,j+1,1)) dp[i+1][j+1][1]+=dp[i][j][1];
+                    if(check(i,j+1,0)) dp[i][j+1][0]+=dp[i][j][1];
+                }
+            }
+            int ret=dp[n][n][0]+dp[n][n][1]+dp[n][n][2];
+            System.out.println(ret);
+
         }
-        public static void dfs(int y,int x){
-            if(y==n-1&&x==n-1){
-                num++;
-                return;
-            }
-            if(visited[y][x]==1){
-                for(int i=0;i<2;i++){
-                    int ny=y+dy[i];
-                    int nx=x+dx[i];
-                    if(ny<0||nx<0||ny>=n||nx>=n||a[ny][nx]==1) continue;
-                    if(i==1&&(y+dy[0]<0||x+dx[0]<0||y+dy[0]>=n||x+dx[0]>=n||a[y+dy[0]][x+dx[0]]==1)) continue;
-                    if(i==1&&(y+dy[2]<0||x+dx[2]<0||y+dy[2]>=n||x+dx[2]>=n||a[y+dy[2]][x+dx[2]]==1)) continue;
-                    visited[ny][nx]=i+1;
-                    dfs(ny,nx);
-                    visited[ny][nx]=0;
-                }
-            }else if(visited[y][x]==2){
-                for(int i=0;i<3;i++){
-                    int ny=y+dy[i];
-                    int nx=x+dx[i];
-                    if(ny<0||nx<0||ny>=n||nx>=n||a[ny][nx]==1) continue;
-                    if(i==1&&(y+dy[0]<0||x+dx[0]<0||y+dy[0]>=n||x+dx[0]>=n||a[y+dy[0]][x+dx[0]]==1)) continue;
-                    if(i==1&&(y+dy[2]<0||x+dx[2]<0||y+dy[2]>=n||x+dx[2]>=n||a[y+dy[2]][x+dx[2]]==1)) continue;
-                    visited[ny][nx]=i+1;
-                    dfs(ny,nx);
-                    visited[ny][nx]=0;
-                }
+
+        public static boolean check(int y,int x,int d){
+            if(d==0||d==2){
+                if(a[y][x]==1) return false;
             }else{
-                for(int i=1;i<3;i++){
-                    int ny=y+dy[i];
-                    int nx=x+dx[i];
-                    if(ny<0||nx<0||ny>=n||nx>=n||a[ny][nx]==1) continue;
-                    if(i==1&&(y+dy[0]<0||x+dx[0]<0||y+dy[0]>=n||x+dx[0]>=n||a[y+dy[0]][x+dx[0]]==1)) continue;
-                    if(i==1&&(y+dy[2]<0||x+dx[2]<0||y+dy[2]>=n||x+dx[2]>=n||a[y+dy[2]][x+dx[2]]==1)) continue;
-                    visited[ny][nx]=i+1;
-                    dfs(ny,nx);
-                    visited[ny][nx]=0;
-                }
+                if(a[y-1][x]==1||a[y][x]==1||a[y][x-1]==1) return false;
             }
+            return true;
+
         }
 
     }
