@@ -1,36 +1,46 @@
-import java.util.*;
- 
+import java.io.*;
+
 public class Main {
- 
-    public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        
-        int n = scan.nextInt();
-        int[][] board = new int[n + 1][3];
-        for(int i = 1; i <= n; i++) {
-            for(int j = 0; j < 3; j++) {
-                board[i][j] = scan.nextInt();
+    public static int n;
+    public static int[][] dpmax;
+    public static int[][] a;
+    public static void main(String[] args) throws IOException {
+        BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
+        StringBuffer sb=new StringBuffer();
+        n=Integer.parseInt(bf.readLine());
+        a=new int[n][3];
+        dpmax=new int[n][3];
+        for(int i=0;i<n;i++){
+            String s=bf.readLine();
+            String[] s1 = s.split(" ");
+            for(int j=0;j<3;j++){
+                a[i][j]=Integer.parseInt(s1[j]);
             }
         }
- 
-        int[][] minDp = new int[n + 1][3];
-        int[][] maxDp = new int[n + 1][3];
-        for(int i = 1; i <= n; i++) {
-            maxDp[i][0] += Math.max(maxDp[i - 1][0], maxDp[i - 1][1]) + board[i][0];
-            maxDp[i][1] += Math.max(Math.max(maxDp[i - 1][0], maxDp[i - 1][1]), maxDp[i - 1][2]) + board[i][1];
-            maxDp[i][2] += Math.max(maxDp[i - 1][1], maxDp[i - 1][2]) + board[i][2];
-            
-            minDp[i][0] += Math.min(minDp[i - 1][0], minDp[i - 1][1]) + board[i][0];
-            minDp[i][1] += Math.min(Math.min(minDp[i - 1][0], minDp[i - 1][1]), minDp[i - 1][2]) + board[i][1];
-            minDp[i][2] += Math.min(minDp[i - 1][1], minDp[i - 1][2]) + board[i][2];
+        dpmax[0][0]=a[0][0];
+        dpmax[0][1]=a[0][1];
+        dpmax[0][2]=a[0][2];
+        for(int i=1;i<n;i++){
+            dpmax[i][0]=Math.max(dpmax[i-1][0],dpmax[i-1][1])+a[i][0];
+            dpmax[i][2]=Math.max(dpmax[i-1][1],dpmax[i-1][2])+a[i][2];
+            dpmax[i][1]=Math.max(Math.max(dpmax[i-1][0],dpmax[i-1][1]),dpmax[i-1][2])+a[i][1];
         }
-        
-        int min = Integer.MAX_VALUE;
-        int max = Integer.MIN_VALUE;
-        for(int i = 0; i < 3; i++) {
-            min = Math.min(min, minDp[n][i]);
-            max = Math.max(max, maxDp[n][i]);
+        int maxn=dpmax[n-1][0];
+        for(int i=1;i<3;i++){
+            maxn=Math.max(maxn,dpmax[n-1][i]);
         }
-        System.out.println(max + " " + min);
+        sb.append(maxn+" ");
+        for(int i=1;i<n;i++){
+            dpmax[i][0]=Math.min(dpmax[i-1][0],dpmax[i-1][1])+a[i][0];
+            dpmax[i][2]=Math.min(dpmax[i-1][1],dpmax[i-1][2])+a[i][2];
+            dpmax[i][1]=Math.min(Math.min(dpmax[i-1][0],dpmax[i-1][1]),dpmax[i-1][2])+a[i][1];
+        }
+        maxn=dpmax[n-1][0];
+        for(int i=1;i<3;i++){
+            maxn=Math.min(maxn,dpmax[n-1][i]);
+        }
+        sb.append(maxn);
+        System.out.println(sb);
     }
+
 }
