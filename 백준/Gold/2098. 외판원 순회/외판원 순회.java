@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 public class Main {
@@ -15,9 +14,9 @@ public class Main {
         n = Integer.parseInt(bf.readLine());
         graph = new int[n][n];
         dp = new long[n][1 << n];
-        for (int i = 0; i < n; i++) {
-            Arrays.fill(dp[i], -1);
-        }
+//        for (int i = 0; i < n; i++) {
+//            Arrays.fill(dp[i], -1);
+//        }
         for (int i = 0; i < n; i++) {
             StringTokenizer st = new StringTokenizer(bf.readLine());
             for (int j = 0; j < n; j++) {
@@ -35,7 +34,11 @@ public class Main {
             }
             return graph[cur][0];
         }
-        if (dp[cur][visited] != -1) return dp[cur][visited];
+        if (dp[cur][visited] != 0) {
+            return dp[cur][visited];
+        }
+//        if (dp[cur][visited] != -1) return dp[cur][visited];
+
         long maxn = Integer.MAX_VALUE;
         for (int i = 0; i < n; i++) {
             if ((visited & (1 << i)) != 0) {
@@ -44,11 +47,9 @@ public class Main {
             if (graph[cur][i] == 0) {
                 continue;
             }
-            maxn = Math.min(maxn, go(visited | (1 << i), i)+ graph[cur][i]);
+            maxn = Math.min(maxn, go(visited | (1 << i), i) + graph[cur][i]);
         }
         dp[cur][visited] = maxn;
         return dp[cur][visited];
     }
 }
-
-
