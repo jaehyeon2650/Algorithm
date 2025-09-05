@@ -1,47 +1,114 @@
-    import java.io.*;
-    import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.StringTokenizer;
 
-    class Main {
+public class Main {
 
-        public static int n;
-        public static int[][] a=new int[18][18];
-        public static int[][][] dp=new int[18][18][3];
+    private static int n;
+    private static int[][] graph;
+    private static int[][][] dp;
 
-        public static void main(String[] args) throws IOException {
-            BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
-            n=Integer.parseInt(bf.readLine());
-            for(int i=1;i<=n;i++){
-                String s=bf.readLine();
-                String[] strings = s.split(" ");
-                for(int j=0;j<n;j++){
-                    a[i][j+1]=Integer.parseInt(strings[j]);
-                }
+    public static void main(String[] args) throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        n = Integer.parseInt(bf.readLine());
+        graph = new int[n][n];
+        dp = new int[n][n][3];
+        for (int i = 0; i < n; i++) {
+            StringTokenizer st = new StringTokenizer(bf.readLine());
+            for (int j = 0; j < n; j++) {
+                graph[i][j] = Integer.parseInt(st.nextToken());
             }
-            dp[1][2][0]=1;
-            for(int i=1;i<=n;i++){
-                for(int j=1;j<=n;j++){
-                    go(i,j);
-                }
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                Arrays.fill(dp[i][j], -1);
             }
-            System.out.println(dp[n][n][0]+dp[n][n][1]+dp[n][n][2]);
         }
-        public static void go(int y,int x){
-            if(check(y,x+1,0)) dp[y][x+1][0]+=dp[y][x][0];
-            if(check(y,x+1,0)) dp[y][x+1][0]+=dp[y][x][1];
 
-            if(check(y+1,x,2)) dp[y+1][x][2]+=dp[y][x][2];
-            if(check(y+1,x,2)) dp[y+1][x][2]+=dp[y][x][1];
+        System.out.println(go(0, 1, 0));
 
-            if(check(y+1,x+1,1)) dp[y+1][x+1][1]+=dp[y][x][0];
-            if(check(y+1,x+1,1)) dp[y+1][x+1][1]+=dp[y][x][1];
-            if(check(y+1,x+1,1)) dp[y+1][x+1][1]+=dp[y][x][2];
-        }
-        public static boolean check(int y,int x,int how){
-            if(how==0||how==2){
-                if(a[y][x]==1) return false;
-            }else{
-                if(a[y][x]==1||a[y-1][x]==1||a[y][x-1]==1) return false;
-            }
-            return true;
-        }
     }
+
+    private static int go(int y, int x, int status) {
+        if (dp[y][x][status] != -1) {
+            return dp[y][x][status];
+        }
+        if (y == n - 1 && x == n - 1) {
+            return 1;
+        }
+
+        int total = 0;
+        if (status == 0) {
+            if (canGoRight(y, x)) {
+                total += go(y, x + 1, 0);
+            }
+            if (canGoSlash(y, x)) {
+                total += go(y + 1, x + 1, 2);
+            }
+        }
+
+        if (status == 1) {
+            if (canGoDown(y, x)) {
+                total += go(y + 1, x, 1);
+            }
+            if (canGoSlash(y, x)) {
+                total += go(y + 1, x + 1, 2);
+            }
+        }
+
+        if (status == 2) {
+            if (canGoRight(y, x)) {
+                total += go(y, x + 1, 0);
+            }
+            if (canGoDown(y, x)) {
+                total += go(y + 1, x, 1);
+            }
+            if (canGoSlash(y, x)) {
+                total += go(y + 1, x + 1, 2);
+            }
+        }
+
+        dp[y][x][status] = total;
+
+        return total;
+    }
+
+    private static boolean canGoSlash(int y, int x) {
+        int[] dy = {0, 1, 1};
+        int[] dx = {1, 0, 1};
+
+        for (int i = 0; i < 3; i++) {
+            int ny = y + dy[i];
+            int nx = x + dx[i];
+            if (ny < 0 || nx < 0 || ny >= n || nx >= n || graph[ny][nx] == 1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean canGoRight(int y, int x) {
+        int ny = y;
+        int nx = x + 1;
+        if (ny < 0 || nx < 0 || ny >= n || nx >= n || graph[ny][nx] == 1) {
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean canGoDown(int y, int x) {
+        int ny = y + 1;
+        int nx = x;
+        if (ny < 0 || nx < 0 || ny >= n || nx >= n || graph[ny][nx] == 1) {
+            return false;
+        }
+        return true;
+    }
+
+
+}
+
+
