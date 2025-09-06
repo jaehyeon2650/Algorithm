@@ -1,59 +1,56 @@
-    import java.io.*;
-    import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.StringTokenizer;
 
-    class Main {
+public class Main {
 
-        public static int n;
-        public static int w;
-        public static int maxn=0;
+    private static int n;
+    private static int m;
+    private static int[] apples;
+    private static int[][][] dp;
 
-        public static int[] apple;
-        public static int[][][] dp;
-
-        public static void main(String[] args) throws IOException {
-            BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
-            String s=bf.readLine();
-            String[] strings = s.split(" ");
-            n=Integer.parseInt(strings[0]);
-            w=Integer.parseInt(strings[1]);
-            apple=new int[n];
-            dp=new int[n][3][w+1];
-            for(int i=0;i<n;i++){
-                apple[i]=Integer.parseInt(bf.readLine());
-            }
-            if(apple[0]==1){
-                dp[0][1][0]=1;
-                dp[0][2][0]=0;
-            }
-            else{
-                dp[0][1][0]=0;
-                dp[0][2][0]=1;
-            }
-            for(int i=1;i<n;i++){
-                for(int k=0;k<=w;k++){
-                    if(i<=k) break;
-                    if(apple[i]==1&&k!=0){
-                        dp[i][1][k]=Math.max(dp[i-1][1][k],dp[i-1][2][k-1])+1;
-                        dp[i][2][k]=Math.max(dp[i-1][2][k],dp[i-1][1][k-1]);
-                    }else if(apple[i]==2&&k!=0){
-                        dp[i][1][k]=Math.max(dp[i-1][1][k],dp[i-1][2][k-1]);
-                        dp[i][2][k]=Math.max(dp[i-1][2][k],dp[i-1][1][k-1])+1;
-                    }else if(apple[i]==1&&k==0){
-                        dp[i][1][k]=dp[i-1][1][k]+1;
-                        dp[i][2][k]=dp[i-1][2][k];
-                    }else if(apple[i]==2&&k==0){
-                        dp[i][1][k]=dp[i-1][1][k];
-                        dp[i][2][k]=dp[i-1][2][k]+1;
-                    }
-                }
-            }
-            for(int i=1;i<3;i++){
-                for(int j=0;j<=w;j++){
-                    maxn=Math.max(dp[n-1][i][j],maxn);
-                }
-            }
-            System.out.println(maxn);
+    public static void main(String[] args) throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(bf.readLine());
+        n = Integer.parseInt(st.nextToken());
+        m = Integer.parseInt(st.nextToken());
+        dp = new int[2][m + 1][n + 1];
+        apples = new int[n];
+        for (int i = 0; i < n; i++) {
+            apples[i] = Integer.parseInt(bf.readLine());
         }
 
-
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j <= m; j++) {
+                Arrays.fill(dp[i][j], -1);
+            }
+        }
+        System.out.println(Math.max(go(0, 0, 0), go(1, 1, 0)));
     }
+
+    private static int go(int cur, int count, int number) {
+        if (count > m) {
+            return 0;
+        }
+        if (number == n) {
+            return 0;
+        }
+        if (dp[cur][count][number] != -1) {
+            return dp[cur][count][number];
+        }
+
+        int maxn = 0;
+
+        maxn = Math.max(go(cur, count, number + 1), maxn);
+        maxn = Math.max(go((cur + 1) % 2, count + 1, number + 1), maxn);
+        int i = (apples[number] == cur + 1 ? 1 : 0);
+        dp[cur][count][number] = maxn + i;
+        return dp[cur][count][number];
+    }
+
+
+}
+
+
