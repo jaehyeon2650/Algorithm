@@ -1,50 +1,50 @@
-    import java.io.*;
-    import java.util.Collection;
-    import java.util.Collections;
-    import java.util.Vector;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
-    class Main {
-        static class Pair implements Comparable<Pair>{
-            public int x,y;
+public class Main {
 
-            public Pair(int x, int y) {
-                this.x = x;
-                this.y = y;
-            }
+    private static int n;
+    private static int maxns = 0;
+    private static int m;
+    private static int[] dp;
+    private static List<Thing> things = new ArrayList<>();
 
-            @Override
-            public int compareTo(Pair o) {
-                return x-o.x;
-            }
-        }
-        public static int n;
-        public static int m;
-        public static int[] dp=new int[100004];
-        public static Vector<Pair> v=new Vector<>();
-        public static int maxn=0;
-        public static void main(String[] args) throws IOException {
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            String s = br.readLine();
-            String[] s1 = s.split(" ");
-            n=Integer.parseInt(s1[0]);
-            m=Integer.parseInt(s1[1]);
-            for(int i=0;i<n;i++){
-                int a,b;
-                s=br.readLine();
-                s1 = s.split(" ");
-                a=Integer.parseInt(s1[0]);
-                b=Integer.parseInt(s1[1]);
-                v.add(new Pair(a,b));
-            }
-            Collections.sort(v);
-            for (int i=0;i<v.size();i++){
-                for(int j=m;j>=v.get(i).x;j--){
-                    if(dp[j]<dp[j-v.get(i).x]+v.get(i).y){
-                         dp[j]=dp[j-v.get(i).x]+v.get(i).y;
-                         maxn=Math.max(maxn,dp[j]);
-                    }
-                }
-            }
-            System.out.println(maxn);
+    static class Thing {
+        public int weight;
+        public int value;
+
+        public Thing(final int weight, final int value) {
+            this.weight = weight;
+            this.value = value;
         }
     }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(bf.readLine());
+
+        n = Integer.parseInt(st.nextToken());
+        m = Integer.parseInt(st.nextToken());
+
+        dp = new int[m + 1];
+
+        for (int i = 0; i < n; i++) {
+            st = new StringTokenizer(bf.readLine());
+            int weight = Integer.parseInt(st.nextToken());
+            int value = Integer.parseInt(st.nextToken());
+            things.add(new Thing(weight, value));
+        }
+
+        for (int i = 0; i < things.size(); i++) {
+            for (int j = m; j >= things.get(i).weight; j--) {
+                dp[j] = Math.max(dp[j], dp[j - things.get(i).weight] + things.get(i).value);
+                maxns = Math.max(maxns, dp[j]);
+            }
+        }
+        System.out.println(maxns);
+    }
+}
