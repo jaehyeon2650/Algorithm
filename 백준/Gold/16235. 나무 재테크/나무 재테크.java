@@ -1,102 +1,110 @@
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayDeque;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.StringTokenizer;
 
 public class Main {
 
-    static int n, m, k, ret;
-    static int[][] A = new int[14][14];
-    static int[][] yangbun = new int[14][14];
-    static List<Integer>[][] a = new ArrayList[14][14];
-    static final int[] dx = {-1, -1, -1, 0, 0, 1, 1, 1};
-    static final int[] dy = {-1, 0, 1, -1, 1, -1, 0, 1};
+    static class Tree implements Comparable<Tree> {
+        public int y;
+        public int x;
+        public int age;
 
-    static void springSummer() {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (a[i][j].size() == 0) continue;
-                int die_tree = 0;
-                List<Integer> temp = new ArrayList<>();
-                Collections.sort(a[i][j]);
-                for (int tree : a[i][j]) {
-                    if (yangbun[i][j] >= tree) {
-                        yangbun[i][j] -= tree;
-                        temp.add(tree + 1);
-                    } else {
-                        die_tree += tree / 2;
-                    }
-                }
+        public Tree(final int y, final int x, final int age) {
+            this.y = y;
+            this.x = x;
+            this.age = age;
+        }
 
-                a[i][j] = temp;
-                yangbun[i][j] += die_tree;
-            }
+        @Override
+        public int compareTo(final Tree o) {
+            return age - o.age;
         }
     }
-    static void fall() {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (a[i][j].size() == 0) continue;
-                for (int tree : a[i][j]) {
-                    if (tree % 5 == 0) {
-                        for (int d = 0; d < 8; d++) {
-                            int ny = i + dy[d];
-                            int nx = j + dx[d];
-                            if (ny < 0 || ny >= n || nx < 0 || nx >= n) continue;
-                            a[ny][nx].add(1);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    static void winter() {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                yangbun[i][j] += A[i][j];
-            }
-        }
-    }
+
+    private static int n;
+    private static int m;
+    private static int k;
+    private static int[][] foods;
+    private static int[][] curFoods;
+    private static int[] dy = {0, 0, 1, 1, 1, -1, -1, -1};
+    private static int[] dx = {-1, 1, -1, 0, 1, -1, 0, 1};
+
+    private static Queue<Tree> trees = new PriorityQueue<>();
+    private static Queue<Tree> diedTrees = new ArrayDeque<>();
 
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st;
-        st = new StringTokenizer(br.readLine());
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(bf.readLine());
         n = Integer.parseInt(st.nextToken());
         m = Integer.parseInt(st.nextToken());
         k = Integer.parseInt(st.nextToken());
+        foods = new int[n + 1][n + 1];
+        curFoods = new int[n + 1][n + 1];
         for (int i = 0; i < n; i++) {
-            Arrays.fill(yangbun[i], 5);
-        }
-        for (int i = 0; i < n; i++) {
-            st = new StringTokenizer(br.readLine());
+            st = new StringTokenizer(bf.readLine());
             for (int j = 0; j < n; j++) {
-                A[i][j] = Integer.parseInt(st.nextToken());
-            }
-        }
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                a[i][j] = new ArrayList<>();
+                curFoods[i][j] = 5;
+                foods[i][j] = Integer.parseInt(st.nextToken());
             }
         }
 
         for (int i = 0; i < m; i++) {
-            st = new StringTokenizer(br.readLine());
+            st = new StringTokenizer(bf.readLine());
             int x = Integer.parseInt(st.nextToken()) - 1;
             int y = Integer.parseInt(st.nextToken()) - 1;
             int age = Integer.parseInt(st.nextToken());
-            a[x][y].add(age);
-        }
-        for (int i = 0; i < k; i++) {
-            springSummer();
-            fall();
-            winter();
+            trees.add(new Tree(x, y, age));
         }
 
-        ret = 0;
+        for (int i = 0; i < k; i++) {
+            int treeCount = trees.size();
+            Queue<Tree> clearTree = new ArrayDeque<>();
+            for (int j = 0; j < treeCount; j++) {
+                Tree tree = trees.poll();
+                if (curFoods[tree.y][tree.x] >= tree.age) {
+                    curFoods[tree.y][tree.x] -= tree.age;
+                    tree.age += 1;
+                    clearTree.add(tree);
+                } else {
+                    diedTrees.add(tree);
+                }
+            }
+
+            trees.addAll(clearTree);
+
+            for (Tree diedTree : diedTrees) {
+                curFoods[diedTree.y][diedTree.x] += (diedTree.age / 2);
+            }
+
+            diedTrees.clear();
+
+            for (Tree tree : clearTree) {
+                if (tree.age % 5 == 0) {
+                    for (int j = 0; j < 8; j++) {
+                        int ny = tree.y + dy[j];
+                        int nx = tree.x + dx[j];
+                        if (ny < 0 || nx < 0 || ny >= n || nx >= n) {
+                            continue;
+                        }
+                        trees.add(new Tree(ny, nx, 1));
+                    }
+                }
+            }
+            addFoods();
+        }
+
+        System.out.println(trees.size());
+    }
+
+    private static void addFoods() {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                ret += a[i][j].size();
+                curFoods[i][j] += foods[i][j];
             }
         }
-        System.out.println(ret);
     }
 }
