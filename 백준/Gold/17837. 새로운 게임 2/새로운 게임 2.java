@@ -1,148 +1,112 @@
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 public class Main {
-    static class Mal{
-        public int y;
-        public int x;
-        public int direction;
-        public Mal(int y, int x, int direction) {
+
+    private static int n;
+    private static int m;
+    private static List<Integer>[][] graph;
+    private static int[][] map;
+    private static Map<Integer, Horse> horses = new HashMap<>();
+    private static int result = 0;
+    private static boolean isFinished = false;
+    private static int[] opposite = {1, 0, 3, 2};
+    private static int[] dx = {1, -1, 0, 0};
+    private static int[] dy = {0, 0, -1, 1};
+
+    static class Horse {
+        int y;
+        int x;
+        int direction;
+
+        public Horse(final int y, final int x, final int direction) {
             this.y = y;
             this.x = x;
             this.direction = direction;
         }
     }
-    public static int num=0;
-    public static boolean can=false;
-    public static int[] dx={1,-1,0,0};
-    public static int[] dy={0,0,-1,1};
-    public static int n;
-    public static int k;
-    public static int[][] map;
-    public static Vector<Integer>[][] mals;
-    public static Vector<Mal> v=new Vector<>();
+
     public static void main(String[] args) throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(bf.readLine());
+        n = Integer.parseInt(st.nextToken());
+        m = Integer.parseInt(st.nextToken());
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String s=br.readLine();
-        String[] s1 = s.split(" ");
-        n=Integer.parseInt(s1[0]);
-        k=Integer.parseInt(s1[1]);
-        map=new int[n+1][n+1];
-        mals=new Vector[n+1][n+1];
-        for(int i=1;i<=n;i++){
-            s=br.readLine();
-            s1=s.split(" ");
-            for(int j=0;j<n;j++){
-                map[i][j+1]=Integer.parseInt(s1[j]);
+        graph = new ArrayList[n][n];
+        map = new int[n][n];
+
+        for (int i = 0; i < n; i++) {
+            st = new StringTokenizer(bf.readLine());
+            for (int j = 0; j < n; j++) {
+                map[i][j] = Integer.parseInt(st.nextToken());
+                graph[i][j] = new ArrayList<>();
             }
         }
-        for(int i=0;i<=n;i++){
-            for(int j=0;j<=n;j++){
-                mals[i][j]=new Vector<>();
+
+        for (int i = 0; i < m; i++) {
+            st = new StringTokenizer(bf.readLine());
+            int y = Integer.parseInt(st.nextToken()) - 1;
+            int x = Integer.parseInt(st.nextToken()) - 1;
+            horses.put(i + 1, new Horse(y, x, Integer.parseInt(st.nextToken()) - 1));
+            graph[y][x].add(i + 1);
+        }
+
+        while (result <= 1000 && !isFinished) {
+            result++;
+            for (int i = 1; i <= m; i++) {
+                Horse curHorse = horses.get(i);
+                int ny = curHorse.y + dy[curHorse.direction];
+                int nx = curHorse.x + dx[curHorse.direction];
+                if (ny < 0 || nx < 0 || ny >= n || nx >= n || map[ny][nx] == 2) {
+                    curHorse.direction = opposite[curHorse.direction];
+                    ny = curHorse.y + dy[curHorse.direction];
+                    nx = curHorse.x + dx[curHorse.direction];
+                }
+                if(ny < 0 || nx < 0 || ny >= n || nx >= n || map[ny][nx] == 2) continue;
+
+                int index = -1;
+                for(int j = 0;j<graph[curHorse.y][curHorse.x].size();j++){
+                    if(graph[curHorse.y][curHorse.x].get(j)==i){
+                        index=j;
+                        break;
+                    }
+                }
+                List<Integer> haveToMove = new ArrayList<>();
+                if(index!=-1){
+                    for(int j=index;j<graph[curHorse.y][curHorse.x].size();j++){
+                        haveToMove.add(graph[curHorse.y][curHorse.x].get(j));
+                    }
+                    graph[curHorse.y][curHorse.x].subList(index,graph[curHorse.y][curHorse.x].size()).clear();
+                }
+
+                if(map[ny][nx]==1){
+                    Collections.reverse(haveToMove);
+                }
+
+                for (Integer integer : haveToMove) {
+                    Horse horse = horses.get(integer);
+                    horse.y = ny;
+                    horse.x = nx;
+                }
+                graph[ny][nx].addAll(haveToMove);
+                if(graph[ny][nx].size()>=4){
+                    isFinished = true;
+                    break;
+                }
             }
         }
-        for(int i=1;i<=k;i++){
-            s=br.readLine();
-            s1=s.split(" ");
-            v.add(new Mal(Integer.parseInt(s1[0]),Integer.parseInt(s1[1]),Integer.parseInt(s1[2])));
-            mals[Integer.parseInt(s1[0])][Integer.parseInt(s1[1])].add(i);
-        }
-        go(0);
-        if(can) System.out.println(num);
-        else System.out.println(-1);
-    }
 
-    public static void go(int cnt){
-        if(can){
-            num=cnt;
-            return;
-        }
-        if(cnt>1000) return;
-        for(int i=0;i<v.size();i++){
-            Mal cur=v.get(i);
-            int result = check(cur.y, cur.x, cur.direction);
-            if(result==0){
-                goWhite(cur,i);
-            }else if(result==1){
-                goRed(cur,i);
-            }else{
-                if(cur.direction==1) cur.direction=2;
-                else if(cur.direction==2) cur.direction=1;
-                else if(cur.direction==3) cur.direction=4;
-                else if(cur.direction==4) cur.direction=3;
-                int check = check(cur.y, cur.x, cur.direction);
-                if(check==1) goRed(cur,i);
-                else if(check==0) goWhite(cur,i);
-            }
-            if(can) break;
-        }
-        go(cnt+1);
-    }
-
-    public static int check(int y,int x,int direction){
-        int ny=y+dy[direction-1];
-        int nx=x+dx[direction-1];
-        if(ny<=0||nx<=0||ny>n||nx>n||map[ny][nx]==2) return 2;
-        else return map[ny][nx];
-    }
-
-    public static void goWhite(Mal cur,int i){
-        int ind = mals[cur.y][cur.x].indexOf(i + 1);
-        Vector<Integer> newv=new Vector<>();
-        Vector<Integer> move=new Vector<>();
-        for(int j=0;j<=ind;j++){
-            move.add(mals[cur.y][cur.x].get(j));
-        }
-       for(int j=ind+1;j<mals[cur.y][cur.x].size();j++){
-           newv.add(mals[cur.y][cur.x].get(j));
-       }
-       mals[cur.y][cur.x]=newv;
-        cur.y=cur.y+dy[cur.direction-1];
-        cur.x=cur.x+dx[cur.direction-1];
-        for(int j=0;j<move.size();j++){
-            Integer i1 = move.get(j);
-            Mal mal = v.get(i1-1);
-            mal.y=cur.y;
-            mal.x=cur.x;
-        }
-        for(int j=0;j<mals[cur.y][cur.x].size();j++){
-            move.add(mals[cur.y][cur.x].get(j));
-        }
-        mals[cur.y][cur.x]=move;
-        if(mals[cur.y][cur.x].size()>=4){
-            can=true;
-            return;
-        }
-    }
-
-    public static void goRed(Mal cur,int i){
-        int ind = mals[cur.y][cur.x].indexOf(i + 1);
-        Vector<Integer> newv=new Vector<>();
-        Vector<Integer> move=new Vector<>();
-        for(int j=0;j<=ind;j++){
-            move.add(mals[cur.y][cur.x].get(j));
-        }
-        for(int j=ind+1;j<mals[cur.y][cur.x].size();j++){
-            newv.add(mals[cur.y][cur.x].get(j));
-        }
-        Collections.reverse(move);
-        mals[cur.y][cur.x]=newv;
-        cur.y=cur.y+dy[cur.direction-1];
-        cur.x=cur.x+dx[cur.direction-1];
-        for(int j=0;j<move.size();j++){
-            Integer i1 = move.get(j);
-            Mal mal = v.get(i1-1);
-            mal.y=cur.y;
-            mal.x=cur.x;
-        }
-        for(int j=0;j<mals[cur.y][cur.x].size();j++){
-            move.add(mals[cur.y][cur.x].get(j));
-        }
-        mals[cur.y][cur.x]=move;
-        if(mals[cur.y][cur.x].size()>=4){
-            can=true;
-            return;
+        if(result>1000){
+            System.out.println(-1);
+        }else{
+            System.out.println(result);
         }
     }
 }
