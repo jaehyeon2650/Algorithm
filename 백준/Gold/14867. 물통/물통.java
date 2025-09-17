@@ -1,68 +1,90 @@
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.StringTokenizer;
+
 
 public class Main {
-    static class Pair{
-        public int a,b;
 
-        public Pair(int a, int b) {
-            this.a = a;
-            this.b = b;
+    private static int a;
+    private static int b;
+    private static int targetA;
+    private static int targetB;
+
+    private static Map<Pair, Integer> result = new HashMap<>();
+
+    static class Pair{
+        int x;
+        int y;
+
+        public Pair(final int x, final int y) {
+            this.x = x;
+            this.y = y;
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Pair pair = (Pair) o;
-            return a == pair.a && b == pair.b;
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            final Pair pair = (Pair) o;
+            return x == pair.x && y == pair.y;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(a, b);
+            return Objects.hash(x, y);
         }
-    }
-    public static int n;
-    public static int m;
-    public static int a;
-    public static int b;
-    public static Map<Pair,Integer> visited=new HashMap<>();
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String s = br.readLine();
-        String[] s1 = s.split(" ");
-        n = Integer.parseInt(s1[0]);
-        m = Integer.parseInt(s1[1]);
-        a = Integer.parseInt(s1[2]);
-        b = Integer.parseInt(s1[3]);
-        System.out.println(dfs(0,0));
-    }
-    public static void go(int nowA,int nowB,Queue<Pair> q,int d){
-        Integer i = visited.get(new Pair(nowA, nowB));
-        if(i!=null) return;
-        visited.put(new Pair(nowA,nowB),d+1);
-        q.add(new Pair(nowA,nowB));
     }
 
-    public static int dfs(int nowA,int nowB){
-        Queue<Pair> q=new ArrayDeque<>();
-        q.add(new Pair(nowA,nowB));
-        visited.put(new Pair(nowA,nowB),1);
-        while (!q.isEmpty()){
-            int x=q.peek().a;
-            int y=q.peek().b;
-            Integer i = visited.get(new Pair(x, y));
-            q.poll();
-            go(n,y,q,i);
-            go(x,m,q,i);
-            go(0,y,q,i);
-            go(x,0,q,i);
-            go(Math.min(x+y,n),Math.max(0,x+y-n),q,i);
-            go(Math.max(0,x+y-m),Math.min(x+y,m),q,i);
-        }
-        Integer result = visited.get(new Pair(a, b));
-        if(result!=null) return result-1;
-        else return -1;
+    public static void main(String[] args) throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(bf.readLine());
+
+        a= Integer.parseInt(st.nextToken());
+        b= Integer.parseInt(st.nextToken());
+        targetA= Integer.parseInt(st.nextToken());
+        targetB= Integer.parseInt(st.nextToken());
+
+        System.out.println(bfs(0,0));
     }
+
+    private static int bfs(int x, int y){
+        Queue<Pair> queue = new ArrayDeque<>();
+        queue.add(new Pair(x,y));
+        result.put(new Pair(x,y),0);
+        while(!queue.isEmpty()){
+            Pair poll = queue.poll();
+            int nowX = poll.x;
+            int nowY = poll.y;
+            int now = result.get(poll);
+            go(0,nowY,queue,now);
+            go(nowX,0,queue,now);
+            go(a,nowY,queue,now);
+            go(nowX,b,queue,now);
+            go(nowX-Math.min(b-nowY,nowX),Math.min(nowX+nowY,b),queue,now);
+            go(Math.min(nowX+nowY,a),nowY-Math.min(a-nowX,nowY),queue,now);
+        }
+        Integer minn = result.getOrDefault(new Pair(targetA, targetB), null);
+        if(minn==null) return -1;
+        return minn;
+    }
+
+    private static void go(int x,int y, Queue<Pair> queue, int now){
+        Integer find = result.getOrDefault(new Pair(x, y), null);
+        if(find!=null) return;
+        result.put(new Pair(x,y),now+1);
+        queue.add(new Pair(x,y));
+    }
+
+
 }
