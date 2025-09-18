@@ -1,44 +1,60 @@
-import java.io.*;
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class Main {
-    public static double a;
-    public static double b;
-    public static double[][][] dp=new double[20][20][20];
+
+    private static double a;
+    private static double b;
+    private static double[][] dpA = new double[19][19];
+    private static double[][] dpB = new double[19][19];
+
+    private static Set<Integer> sosu = new HashSet<>();
+
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        for(int i=0;i<20;i++){
-            for(int j=0;j<20;j++){
-                Arrays.fill(dp[i][j],-1);
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        a = Double.parseDouble(bf.readLine()) / 100;
+        b = Double.parseDouble(bf.readLine()) / 100;
+        init();
+        dpA[1][0] = 1 - a;
+        dpA[1][1] = a;
+        dpB[1][0] = 1 - b;
+        dpB[1][1] = b;
+        for (int i = 2; i <= 18; i++) {
+            for (int j = 0; j <= i; j++) {
+                if (j == 0) {
+                    dpA[i][j] = dpA[i - 1][j] * (1-a);
+                    dpB[i][j] = dpB[i - 1][j] * (1-b);
+
+                } else {
+                    dpA[i][j] = dpA[i - 1][j - 1] * a + dpA[i-1][j] * (1 - a);
+                    dpB[i][j] = dpB[i - 1][j - 1] * b + dpB[i-1][j] * (1 - b);
+                }
             }
         }
-        a=Double.parseDouble(br.readLine());
-        b=Double.parseDouble(br.readLine());
-        a/=100; b/=100;
-        System.out.printf("%.6f", go(0,0,0));
-    }
-    public static double go(int ind,int x,int y){
-        if(ind==18){
-            if(check(x)||check(y)) return 1;
-            return 0;
+        double result = 0;
+        for (int i = 0; i <= 18; i++) {
+            for (int j = 0; j <= 18; j++) {
+                if(!sosu.contains(i) && !sosu.contains(j)){
+                    result+=dpA[18][i]*dpB[18][j];
+                }
+            }
         }
-        if(dp[ind][x][y]>-0.5) return dp[ind][x][y];
-        double result=0;
-        result+=go(ind+1,x+1,y)*a*(1-b);
-        result+=go(ind+1,x,y)*(1-a)*(1-b);
-        result+=go(ind+1,x,y+1)*(1-a)*b;
-        result+=go(ind+1,x+1,y+1)*a*b;
-        dp[ind][x][y]=result;
-        return result;
+
+        System.out.println(1-result);
 
     }
-    public static boolean check(int x){
-        if(x==1) return false;
-        if(x==2||x==3) return true;
-        if (x % 2 == 0 || x % 3 == 0) return false;
-        for(int i=2;i<19;i=i*i){
-            if(x%i==0) return false;
-        }
-        return true;
+
+    private static void init() {
+        sosu.add(2);
+        sosu.add(3);
+        sosu.add(5);
+        sosu.add(7);
+        sosu.add(11);
+        sosu.add(13);
+        sosu.add(17);
     }
 }
