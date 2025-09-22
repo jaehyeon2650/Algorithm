@@ -1,50 +1,57 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 
+
 public class Main {
-    public static int n;
-    public static int[][] dp=new int[2501][2501];
-    public static int[] dp2=new int[2501];
-    public static String s;
-    public static int mimm=Integer.MAX_VALUE;
+
+    private static int[][] pals;
+    private static int[] dp;
+    private static int n;
+    private static String input;
+
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        s=br.readLine();
-        n=s.length();
-        for(int i=0;i<n;i++){
-            Arrays.fill(dp[i],-1);
-        }
-        Arrays.fill(dp2,-1);
-        for(int i=0;i<n;i++){
-            dp[i][i]=1;
-        }
-        for(int i=0;i<n;i++){
-            for(int j=i;j<n;j++){
-                go(i,j);
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        input = bf.readLine();
+        n = input.length();
+        dp=new int[n+1];
+        Arrays.fill(dp,Integer.MAX_VALUE);
+        pals = new int[n + 1][n + 1];
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                if (pals[i][j] == 0) {
+                    go(i, j);
+                }
             }
         }
-        Arrays.fill(dp2,99999999);
         System.out.println(go2(0));
     }
-    public static int go(int x,int y){
-        if(dp[x][y]!=-1) return dp[x][y];
-        if(s.charAt(x)!=s.charAt(y)){
-            dp[x][y]=0;
-            return 0;
+
+    public static int go(int x, int y) {
+        if (x > y) {
+            return 2;
         }
-        int ret=1;
-        if(x+1<=y-1) ret=go(x+1,y-1);
-        dp[x][y]=ret;
-        return ret;
+        if (pals[x][y] != 0) {
+            return pals[x][y];
+        }
+        if (input.charAt(x) != input.charAt(y)) {
+            pals[x][y] = 1;
+            return 1;
+        }
+        int result = go(x + 1, y - 1);
+        pals[x][y] = result;
+        return result;
     }
-    public static int go2(int here){
-        if(here>=n) return 0;
-        if(dp2[here]!=99999999) return dp2[here];
-        int ret=dp2[here];
-        for(int i=here;i<n;i++){
-            if(dp[here][i]==1) ret=Math.min(ret,go2(i+1)+1);
+
+    public static int go2(int now) {
+        if(now>=n) return 0;
+        if(dp[now]!=Integer.MAX_VALUE) return dp[now];
+        int result = dp[now];
+        for(int i=now;i<n;i++){
+            if(pals[now][i]==2) result = Math.min(result,go2(i+1)+1);
         }
-        dp2[here]=ret;
-        return ret;
+        dp[now]=result;
+        return result;
     }
 }
