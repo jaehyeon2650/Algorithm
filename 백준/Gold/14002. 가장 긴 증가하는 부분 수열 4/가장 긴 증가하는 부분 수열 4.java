@@ -1,56 +1,60 @@
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
+import java.util.StringTokenizer;
 
-class Main {
 
-    public static int n;
-    public static int[] a;
-    public static int[] dp;
-    public static int[] result;
+public class Main {
+
+    private static int n;
+    private static int[] dp;
+    private static int[] arr;
+    private static int[] result;
 
     public static void main(String[] args) throws IOException {
         BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
-        n=Integer.parseInt(bf.readLine());
-        a=new int[n];
-        dp=new int[n];
-        result=new int[n];
+        n = Integer.parseInt(bf.readLine());
+        dp = new int[n];
+        arr = new int[n];
+        result = new int[n];
         Arrays.fill(result,-1);
-        String s=bf.readLine();
-        String[] strings = s.split(" ");
+        StringTokenizer st = new StringTokenizer(bf.readLine());
         for(int i=0;i<n;i++){
-            a[i]=Integer.parseInt(strings[i]);
+            arr[i] = Integer.parseInt(st.nextToken());
         }
-        for(int i=0;i<n;i++){
-            int minn=0;
-            int minIndex=-1;
+        dp[0]=1;
+        int maxn = 1;
+        int maxIndex = 0;
+        for(int i=1;i<n;i++){
+            int num = arr[i];
+            dp[i]=1;
             for(int j=0;j<i;j++){
-                if(a[i]>a[j]&&minn<=dp[j]){
-                    minn=dp[j];
-                    minIndex=j;
+                if(arr[j]<num){
+                    if(dp[i]<dp[j]+1){
+                        result[i] = j;
+                        dp[i] = dp[j]+1;
+                        if(maxn<dp[i]){
+                            maxn = dp[i];
+                            maxIndex=i;
+                        }
+                    }
                 }
             }
-            if(minIndex!=-1){
-                result[i]=minIndex;
-            }
-            dp[i]=minn+1;
         }
-        int minn=Integer.MIN_VALUE;
-        int index=0;
-        for(int i=0;i<n;i++){
-            if(minn<dp[i]){
-                minn=dp[i];
-                index=i;
-            }
+        StringBuilder sb = new StringBuilder();
+        Stack<Integer> results = new Stack<>();
+        System.out.println(maxn);
+        while(maxIndex!=-1){
+            results.add(arr[maxIndex]);
+            maxIndex = result[maxIndex];
         }
-        System.out.println(minn);
-        ArrayList<Integer> arr=new ArrayList<>();
-        while(index!=-1){
-            arr.add(a[index]);
-            index=result[index];
+        while(!results.isEmpty()){
+            sb.append(results.pop()+" ");
         }
-        for(int i=arr.size()-1;i>=0;i--){
-            System.out.print(arr.get(i)+" ");
-        }
-
+        System.out.println(sb);
     }
 }
