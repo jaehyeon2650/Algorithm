@@ -1,57 +1,81 @@
-    import java.io.*;
-    import java.util.Arrays;
-    import java.util.Collections;
-    import java.util.Stack;
-    import java.util.Vector;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Stack;
+import java.util.StringTokenizer;
 
-    class Main {
-        static class Pair{
-            public Long x;
-            public int y;
 
-            public Pair(Long x, int y) {
-                this.x = x;
-                this.y = y;
-            }
+public class Main {
+
+    static class Point implements Comparable<Point> {
+        int num;
+        int index;
+
+        public Point(final int num, final int index) {
+            this.num = num;
+            this.index = index;
         }
-        public static int n;
-        public static Long[] a;
-        public static Long[] result;
-        public static Vector<Pair> v=new Vector<>();
 
-        public static void main(String[] args) throws IOException {
-            BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
-            n = Integer.parseInt(bf.readLine());
-            String s = bf.readLine();
-            String[] strings = s.split(" ");
-            a = new Long[n];
-            result = new Long[n];
-            Arrays.fill(result,Long.MAX_VALUE);
-            for (int i = 0; i < n; i++) {
-                a[i] = Long.parseLong(strings[i]);
-            }
-            int index=0;
-            for(int i=0;i<n;i++){
-                int ind = Arrays.binarySearch(result,0,index+1, a[i]);
-                if(ind<0){
-                    result[-ind-1]=a[i];
-                    v.add(new Pair(a[i],-ind-1));
-                    index=Math.max(index,-ind-1);
-                }
-            }
-            System.out.println(index+1);
-            Stack<Long> st=new Stack<>();
-            for(int i=v.size()-1;i>=0;i--){
-                Pair pair = v.get(i);
-                if(pair.y==index){
-                    st.push(pair.x);
-                    index--;
-                }
-            }
-            StringBuffer b=new StringBuffer();
-            while(!st.isEmpty()){
-                b.append(st.pop()+" ");
-            }
-            System.out.println(b);
+        @Override
+        public int compareTo(final Point o) {
+            return num - o.num;
         }
     }
+
+    private static int n;
+    private static int[] dp;
+    private static int[] arr;
+    private static int[] result;
+    private static List<Point> list = new ArrayList<>();
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        n = Integer.parseInt(bf.readLine());
+        dp = new int[n];
+        arr = new int[n];
+        result = new int[n];
+        Arrays.fill(result, -1);
+        StringTokenizer st = new StringTokenizer(bf.readLine());
+        for (int i = 0; i < n; i++) {
+            arr[i] = Integer.parseInt(st.nextToken());
+        }
+        dp[0] = 1;
+        int maxIndex = 0;
+        list.add(new Point(arr[0], 0));
+        for (int i = 1; i < n; i++) {
+            int num = arr[i];
+            int index = Collections.binarySearch(list, new Point(num, i));
+            if (index < 0) {
+                index = -(index + 1);
+            }
+            if (index == list.size()) {
+                dp[i] = dp[list.size() - 1] + 1;
+                maxIndex = i;
+                result[i] = list.get(index-1).index;
+                list.add(new Point(num,i));
+            }else{
+                list.set(index,new Point(num,i));
+                dp[i] = 1;
+                if(index>0){
+                    result[i] = list.get(index-1).index;
+                    dp[i] = dp[index-1]+1;
+                }
+            }
+        }
+        Stack<Integer> stack =  new Stack<>();
+        System.out.println(list.size());
+        while(maxIndex!=-1){
+            stack.add(arr[maxIndex]);
+            maxIndex = result[maxIndex];
+        }
+        StringBuilder sb = new StringBuilder();
+        while(!stack.isEmpty()){
+            sb.append(stack.pop()+" ");
+        }
+        System.out.println(sb);
+    }
+}
